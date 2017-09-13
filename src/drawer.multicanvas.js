@@ -228,9 +228,10 @@ export default class MultiCanvas extends Drawer {
      * @param {number} start The x-offset of the beginning of the area that
      * should be rendered
      * @param {number} end The x-offset of the end of the area that should be
+     * @param {number} radius The border radius of the bar
      * rendered
      */
-    drawBars(peaks, channelIndex, start, end) {
+    drawBars(peaks, channelIndex, start, end, radius) {
         return this.prepareDraw(peaks, channelIndex, start, end, ({
             absmax,
             hasMinVals,
@@ -258,7 +259,7 @@ export default class MultiCanvas extends Drawer {
             for (i = first; i < last; i += step) {
                 const peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
                 const h = Math.round(peak / absmax * halfH);
-                this.fillRect(i + this.halfPixel, halfH - h + offsetY, bar + this.halfPixel, h * 2);
+                this.fillRect(i + this.halfPixel, halfH - h + offsetY, bar + this.halfPixel, h * 2, radius);
             }
         });
     }
@@ -387,13 +388,16 @@ export default class MultiCanvas extends Drawer {
      * @param {number} y
      * @param {number} width
      * @param {number} height
+     * @param {number} radius
      */
-    fillRect(x, y, width, height) {
+    fillRect(x, y, width, height, radius) {
         const startCanvas = Math.floor(x / this.maxCanvasWidth);
         const endCanvas = Math.min(
           Math.ceil((x + width) / this.maxCanvasWidth) + 1,
           this.canvases.length
         );
+
+        const fill = radius === 0 ? this.fillRectToContext : this.fillRoundRectToContext;
         let i;
         for (i = startCanvas; i < endCanvas; i++) {
             const entry = this.canvases[i];
@@ -409,17 +413,19 @@ export default class MultiCanvas extends Drawer {
             if (intersection.x1 < intersection.x2) {
                 this.setFillStyles(entry);
 
-                this.fillRectToContext(entry.waveCtx,
+                fill(entry.waveCtx,
                         intersection.x1 - leftOffset,
                         intersection.y1,
                         intersection.x2 - intersection.x1,
-                        intersection.y2 - intersection.y1);
+                        intersection.y2 - intersection.y1,
+                        radius);
 
-                this.fillRectToContext(entry.progressCtx,
+                fill(entry.progressCtx,
                         intersection.x1 - leftOffset,
                         intersection.y1,
                         intersection.x2 - intersection.x1,
-                        intersection.y2 - intersection.y1);
+                        intersection.y2 - intersection.y1,
+                        radius);
             }
         }
     }
@@ -491,6 +497,54 @@ export default class MultiCanvas extends Drawer {
     fillRectToContext(ctx, x, y, width, height) {
         if (!ctx) { return; }
         ctx.fillRect(x, y, width, height);
+    }
+
+    /**
+     * Draw the actual rounded rectangle on a canvas
+     * @param {Canvas2DContextAttributes} ctx
+     * @param {number} x
+     * @param {number} y
+     * @param {number} width
+     * @param {number} height
+     * @param {number} radius
+     * @param {bool} fill
+     * @param {bool} stroke
+     */
+    fillRoundRectToContext(ctx, x, y, width, height, radius = 4, fill = true, stroke = false) {
+        if (!ctx) { return; }
+        if (typeof radius === 'number') {
+            radius = {tl: radius, tr: radius, br: radius, bl: radius};
+        } else {
+            const defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+            for (const side in defaultRadius) {
+                radius[side] = radius[side] || defaultRadius[side];
+            }
+        }
+        if (height < 0) {
+            height = -height;
+            y = y - height;
+        }
+        if (Math.abs(height) < Math.abs(radius.tl * 2)) {
+            height = Math.abs(radius.tl * 2);
+            y = y - radius.tl;
+        }
+        ctx.beginPath();
+        ctx.moveTo(x + radius.tl, y);
+        ctx.lineTo(x + width - radius.tr, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+        ctx.lineTo(x + width, y + height - radius.br);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+        ctx.lineTo(x + radius.bl, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+        ctx.lineTo(x, y + radius.tl);
+        ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+        ctx.closePath();
+        if (fill) {
+            ctx.fill();
+        }
+        if (stroke) {
+            ctx.stroke();
+        }
     }
 
     /**

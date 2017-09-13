@@ -146,8 +146,13 @@ export default class Drawer extends util.Observer {
             this.clearWave();
         }
 
+        let radius = 0;
+        if (this.params.barRadius) {
+            radius = this.params.barRadius;
+        }
+
         this.params.barWidth ?
-            this.drawBars(peaks, 0, start, end) :
+            this.drawBars(peaks, 0, start, end, radius) :
             this.drawWave(peaks, 0, start, end);
     }
 
@@ -321,9 +326,10 @@ export default class Drawer extends util.Observer {
      * @param {number} start The x-offset of the beginning of the area that
      * should be rendered
      * @param {number} end The x-offset of the end of the area that should be
+     * @param {number} radius The border radius of the bar
      * rendered
      */
-    drawBars(peaks, channelIndex, start, end) {}
+    drawBars(peaks, channelIndex, start, end, radius) {}
 
     /**
      * Draw a waveform
