@@ -397,7 +397,7 @@ export default class MultiCanvas extends Drawer {
           this.canvases.length
         );
 
-        const fill = radius === 0 ? this.fillRectToContext : this.fillRoundRectToContext;
+        const fill = radius === 0 ? this.fillRectToContext : this.fillRoundRectToContext.bind(this);
         let i;
         for (i = startCanvas; i < endCanvas; i++) {
             const entry = this.canvases[i];
@@ -526,7 +526,7 @@ export default class MultiCanvas extends Drawer {
         }
         if (Math.abs(height) < Math.abs(radius.tl * 2)) {
             height = Math.abs(radius.tl * 2);
-            y = y - radius.tl;
+            y = this.params.height - radius.tl;
         }
         ctx.beginPath();
         ctx.moveTo(x + radius.tl, y);
