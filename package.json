@@ -1,5 +1,5 @@
 {
-  "name": "wavesurfer.js",
+  "name": "stylingwavesurfer.js",
   "version": "2.0.0-beta01",
   "description": "Interactive navigable audio visualization using Web Audio and Canvas",
   "main": "dist/wavesurfer.min.js",
