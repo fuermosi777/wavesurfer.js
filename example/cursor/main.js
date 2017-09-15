@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     wavesurfer = WaveSurfer.create({
         container: document.querySelector('#waveform'),
         barWidth: 4,
-        barRadius: 5,
+        barRadius: 3,
         height: 40,
         normalize: true
     });

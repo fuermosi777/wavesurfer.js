@@ -526,7 +526,7 @@ export default class MultiCanvas extends Drawer {
         }
         if (Math.abs(height) < Math.abs(radius.tl * 2)) {
             height = Math.abs(radius.tl * 2);
-            y = this.params.height - radius.tl;
+            y = this.params.height / 2 - radius.tl / 2;
         }
         ctx.beginPath();
         ctx.moveTo(x + radius.tl, y);
