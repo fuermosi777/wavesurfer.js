@@ -512,7 +512,6 @@ export default class MultiCanvas extends Drawer {
      */
     fillRoundRectToContext(ctx, x, y, width, height, radius = 4, fill = true, stroke = false) {
         if (!ctx) { return; }
-        const doublePixel = this.halfPixel * 4;
         if (typeof radius === 'number') {
             radius = {tl: radius, tr: radius, br: radius, bl: radius};
         } else {
@@ -525,9 +524,9 @@ export default class MultiCanvas extends Drawer {
             height = -height;
             y = y - height;
         }
-        if (Math.abs(height) < Math.abs(radius.tl * 2)) {
-            height = Math.abs(radius.tl * 2);
-            y = this.params.height * doublePixel - radius.tl * doublePixel;
+        if (Math.abs(height) < Math.abs(width)) {
+            height = Math.abs(width);
+            y = this.params.height / this.halfPixel / 4 - height / 2;
         }
         ctx.beginPath();
         ctx.moveTo(x + radius.tl, y);
